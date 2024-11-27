@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake</title>
+    <style>
+        body {
+            background-color: rgb(7, 186, 246);
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            display: flex;
+            overflow: hidden; 
+        }
+
+        #container {
+            height: 90%;
+            width: 50%;
+            margin: 5px auto;
+            padding: 3px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 1);
+        }
+        #image-container {
+            margin-right: 30px;
+            width: 25%;
+            margin-top: 200px;
+            position: relative; 
+        }
+        #image-container2 {
+            margin-left: 10px;
+            width: 25%;
+            margin-top: 250px;
+            position: relative; 
+        }
+
+        h2 {
+            font-weight: bold;
+            letter-spacing: 1px;
+            font-family: 'Oswald', sans-serif;
+        }
+        h1 {
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-decoration: underline;
+            font-family: 'Playfair Display', serif;
+        }
+
+        #puntos {
+            margin-bottom: 10px;
+            font-size: 20px;
+            color: #010d43;
+        }
+
+        #puntosMax {
+            margin-bottom: 10px;
+            font-size: 24px;
+            color: rgb(255, 0, 174);
+        }
+
+        #tablero {
+            display: grid;
+            grid-template-columns: repeat(30, 20px);
+            grid-template-rows: repeat(30, 20px);
+            width: 600px;
+            height: 600px;
+            margin: 5px auto;
+            border: 2px solid #333;
+            border-radius: 10px;
+            background-color: blueviolet;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 1);
+        }
+
+        .snake {
+            background-color: rgb(17, 255, 0);
+            border-radius: 15%;
+        }
+
+        #food {
+            background-color: rgb(207, 4, 4);
+            border-radius: 50%;
+        }
+
+        @media screen and (max-width: 1200px) {
+
+        #image-container, #image-container2 {
+        display: none;
+        }
+        }
+
+        @media screen and (max-width: 1200px){
+
+        #container {
+        width: 90%; 
+        margin: auto; 
+        }
+        }
+
+    </style>
+
+</head>
+<body>
+    <!--Container-->
+    <div id="image-container">
+        <img src="imagenes/snake.png" alt="imagen snake">
+    </div>
+        
+    <div id="container">
+        <!--Header-->
+        
+        <div id="titulo">
+            <h1>SNAKE</h1>            
+        </div>
+        <h2 id="puntosMax">Highscore</h2>
+        <h2 id="puntos">Score</h2>
+        <!--Main body-->
+        <div id="tablero">
+        </div>
+    </div>
+    <div id="image-container2">
+        <img src="imagenes/manzana.png" style="width: 350px; height: 300px;" alt="imagen manzana">
+    </div>
+
+    <script>
+        let tablero = document.getElementById("tablero");
+        let scoreElement = document.getElementById("puntos");
+        let highScoreElement = document.getElementById("puntosMax");
+
+        let foodX;
+        let foodY;
+        let snakeX = 15;
+        let snakeY = 15;
+        let velocidadX = 1;
+        let velocidadY = 0;
+        let cuerpoSnake = [{x: snakeX, y: snakeY}];
+        let setIntervalId;
+        let score = 0;
+        let highScore = 0;
+
+        // Función para dibujar el snake
+        function drawSnake() {
+            let parteSnake=document.createElement("div");
+            parteSnake.style.gridColumnStart = snakeX;
+            parteSnake.style.gridRowStart = snakeY;
+            parteSnake.className="snake";
+            tablero.appendChild(parteSnake);
+        }
+
+        // Función para dibujar comida de manera aleatoria
+        function drawFood() {
+            let isFoodOnSnake = false;
+            //do-while para verificar que no aparezca comida dentro del cuerpo del serpiente
+            do {
+                foodX = Math.floor(Math.random() * 30) + 1; // generar coordenada x random
+                foodY = Math.floor(Math.random() * 30) + 1; // generar coordenada y random
+
+                // bucle for para verificar las coordenadas
+                for (let i = 0; i < cuerpoSnake.length; i++) {
+                    if (cuerpoSnake[i].x === foodX && cuerpoSnake[i].y === foodY) {
+                        isFoodOnSnake = true;
+                        break;
+                    }
+                }
+            } while (isFoodOnSnake);
+
+            // Creacion elemento comida
+            let food = document.createElement('div');
+            food.id='food';
+            food.style.gridColumnStart = foodX;
+            food.style.gridRowStart = foodY;
+            tablero.appendChild(food);
+        }
+
+        // Función para actualizar la posición de las coordenadas
+        function updateSnakePosition() {
+            // Update de las coodenadas de la cabeza
+            snakeX += velocidadX;
+            snakeY += velocidadY;
+            // Verificar si la serpiente colisiona consigo misma o con la pared
+             if(checkColision()){
+                clearInterval(setIntervalId); // parar el juego
+                alert("Game Over!");
+                restartGame();
+             } 
+             // Si no colisiona, sigue la partida
+             else {
+                cuerpoSnake.unshift({x: snakeX, y: snakeY});
+                // Comprobar si se ha comido la manzana
+                if(!onFoodColision()){
+                    cuerpoSnake.pop();
+                    // borrar el elemento anterior
+                    let previousSnakeHeads = document.getElementsByClassName('snake');
+                    tablero.removeChild(previousSnakeHeads[0]); 
+                }
+             }
+             // Ajustar el intervalo de tiempo basado en la longitud del snake
+            if (cuerpoSnake.length>2&&cuerpoSnake.length<=4) {
+            clearInterval(setIntervalId);
+            setIntervalId = setInterval(updateSnakePosition, 200);
+            } else if (cuerpoSnake.length>4&&cuerpoSnake.length<=7) {
+            clearInterval(setIntervalId);
+            setIntervalId = setInterval(updateSnakePosition, 150);
+            } else if (cuerpoSnake.length>7&&cuerpoSnake.length<=10) {
+            clearInterval(setIntervalId);
+            setIntervalId = setInterval(updateSnakePosition, 100);
+            } else if (cuerpoSnake.length>10&&cuerpoSnake.length<=15) {
+            clearInterval(setIntervalId);
+            setIntervalId = setInterval(updateSnakePosition, 75);
+            }else if (cuerpoSnake.length>15&&cuerpoSnake.length<=20) {
+            clearInterval(setIntervalId);
+            setIntervalId = setInterval(updateSnakePosition, 50);
+            }else if (cuerpoSnake.length>20) {
+            clearInterval(setIntervalId);
+            setIntervalId = setInterval(updateSnakePosition, 25);
+    }
+
+            // dibujar el nuevo elemento
+            drawSnake();
+            
+        }
+
+        //interval inicial de 250ms
+        
+        setIntervalId = setInterval(updateSnakePosition, 250);
+        
+
+        //function resetear el juego tras una colision
+        function restartGame() {
+            snakeX = 15;
+            snakeY = 15;
+            velocidadX = 1;
+            velocidadY = 0;
+            cuerpoSnake = [{x: snakeX, y: snakeY}];
+            score = 0;
+            scoreElement.textContent = "Score: " + score;
+            tablero.innerHTML = '';
+            drawFood();
+            setIntervalId = setInterval(updateSnakePosition, 200); 
+        }
+
+
+        // Función que verifica si la serpiente colisiona, es decir, acaba la partida
+        function checkColision() {
+            // Verificar colision con pared
+            if (snakeX < 1 || snakeX > 30 || snakeY < 1 || snakeY > 30) {
+                return true;
+            }
+
+            // Verificar colisión con cuerpo *** no funciona, toma la comida como parte del cuerpo***
+            for (let i = 0; i < cuerpoSnake.length; i++) {
+                if (cuerpoSnake[i].x == snakeX && cuerpoSnake[i].y == snakeY) {
+                    return true;
+                }
+            }
+
+            return false;            
+        }
+
+        function onFoodColision(){
+            // Si la cabeza del snake choca directamente con la comida
+            if (snakeX == foodX && snakeY == foodY) {
+                // Suben los puntos
+                score++;
+                // Si los puntos actuales son mayores al highscore, este se actualiza 
+                if(highScore<score)
+                    highScore=score;
+                scoreElement.textContent = "Score: " + score;
+                highScoreElement.textContent = "HighScore: " + highScore;
+                // Se borra la comida 
+                let eatenFood = document.getElementById('food');
+                tablero.removeChild(eatenFood);
+                // crear nueva comida
+                drawFood();
+                return true;
+            }  else {
+                return false;
+            }
+        }
+
+
+        //funcion para las teclas con condiciones para no poder ir al contrario de la direccion actual
+        function updateDireccion(event) {
+            event.preventDefault(); //evitar el scroll al usar las teclas
+            switch(event.key) {
+                case 'ArrowUp':
+                    if (velocidadY !== 1) { 
+                        velocidadX = 0;
+                        velocidadY = -1;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (velocidadY !== -1) { 
+                        velocidadX = 0;
+                        velocidadY = 1;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (velocidadX !== 1) { 
+                        velocidadX = -1;
+                        velocidadY = 0;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (velocidadX !== -1) {
+                        velocidadX = 1;
+                        velocidadY = 0;
+                    }
+                    break;
+            }
+        }
+        
+        document.addEventListener('keydown', updateDireccion);
+        drawSnake();
+        drawFood();
+    </script>
+    
+</body>
+</html>

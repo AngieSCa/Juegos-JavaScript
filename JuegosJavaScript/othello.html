@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Othello</title>
+</head>
+<body class="h-full bg-blue-200">
+    <!--Container-->
+    <div class="flex flex-col text-center w-full h-full bg-gray-200 justify-items-center">
+        <!--Header-->
+        <div class="container my-12 border-4 w-40 mx-auto border-fuchsia-700 rounded-full ">
+            <h1 class="block  text-3xl font-bold shadow-2xl bg-fuchsia-300 rounded-full text-blue-700">Othello</h1>            
+        </div>
+        <!--Main body-->
+        <div id="tablero" class="container grid-rows-8 grid-cols-8 h-80 w-80 justify-items-stretch m-auto border-2 border-blue-950 bg-green-700 grid">
+
+        </div>
+
+    </div>
+
+    <script>
+
+        let fPuestas =[
+            [,,,,,,,], //0
+            [,,,,,,,], //1
+            [,,,,,,,], //2
+            [,,,"N","B",,,], //3
+            [,,,"B","N",,,], //4
+            [,,,,,,,], //5
+            [,,,,,,,], //6
+            [,,,,,,,] //7
+        ];
+        let fDisponibles=[
+            [,,,,,,,], //0
+            [,,,,,,,], //1
+            [,,,,,,,], //2
+            [,,,,,,,], //3
+            [,,,,,,,], //4
+            [,,,,,,,], //5
+            [,,,,,,,], //6
+            [,,,,,,,] //7
+        ];
+        let tablero=document.getElementById("tablero");
+        
+       function estaDisponible(){
+            for(let i=0; i<8; i++){
+                for(let j=0; j<8; j++){
+                    if(typeof fPuestas[i][j]=="undefined"){
+                        for(let x=i-1; x<i+1; x++){
+                            for(let y=j-1; y<j+1; y++){
+                                //condicion para buscar alrededor de cuadrado vacion
+                            }
+                        }
+                    } else {
+                        fDisponibles[i][j]=false;
+                    }
+                }
+            }
+       }
+        
+
+        for(let i=0; i<8; i++){
+            for(let j=0; j<8; j++){
+                let cuadro=document.createElement("div");
+                cuadro.className="col-span-1 row-span-1 bg-green-600 border-2 border-black";
+                cuadro.id="c"+i+""+j;
+                tablero.appendChild(cuadro);
+            }
+            
+        }
+
+
+        for(let i=0; i< 2; i++){
+            for(let j=0; j< 2; j++){
+                let fBlanco=document.createElement("div");
+                fBlanco.className="w-full h-full rounded-full bg-white";
+                let fNegro=document.createElement("div");
+                fNegro.className="w-full h-full rounded-full bg-black";
+                let ide="c"+(3+i)+""+(3+j);
+                console.log(ide);
+                let pos=document.getElementById(ide);
+
+
+                if((i+j)%2==0){
+                    pos.appendChild(fNegro);
+                } else{
+                    pos.appendChild(fBlanco);
+                }
+            }
+
+        }
+
+
+
+    </script>
+</body>
+</html>
